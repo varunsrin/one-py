@@ -1,5 +1,9 @@
 import onepy
 
+#Gets the Hierarchy as JSON
+notebooksJson =  onepy.getHierarchyJson()
+
+#Gets the Hierarchy as an Array of Python Dictionaries
 notebooks = onepy.getHierarchy()
 
 #Prints the firt notebook
