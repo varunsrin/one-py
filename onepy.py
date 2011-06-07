@@ -1,13 +1,10 @@
 import json
 import win32com.client
-import xml.etree.ElementTree
+from xml.etree import ElementTree
 
 onapp = win32com.client.gencache.EnsureDispatch('OneNote.Application')
-nb = onapp.GetHierarchy("",win32com.client.constants.hsPages)
-
-
 NS = "{http://schemas.microsoft.com/office/onenote/2010/onenote}"
-oneTree = xml.etree.ElementTree.fromstring(nb)
+
 
 
 #Returns the Notebook Hierarchy as JSON
@@ -15,8 +12,11 @@ def getHierarchyJson():
     return(json.dumps(getHierarchy(), indent=4))
 
 
+
 # Returns the Notebook Hierarchy as a Dictionary Array  
 def getHierarchy():
+    oneTree = ElementTree.fromstring(onapp.GetHierarchy("",win32com.client.constants.hsPages))
+    
     notebooks = []
 
     for notebook in oneTree:
@@ -29,7 +29,6 @@ def getHierarchy():
 
 
 # Takes in a Notebook or SectionGroup  and returns a Dict Array of its Sections & Section Groups
-
 def getSections(notebook):
     sections = []
     sectionGroups = []
@@ -47,6 +46,7 @@ def getSections(notebook):
     return sections, sectionGroups
 
 
+
 # Takes in a Section and returns a Dict Array of its Pages
 def getPages(section):
      pages =[]
@@ -59,8 +59,6 @@ def getPages(section):
 
 
 
-
-
 # Takes in a Page and returns a Dict Array of its Meta properties
 def getMeta (page):
     metas = []
@@ -69,19 +67,10 @@ def getMeta (page):
     return metas
 
 
+
 # Takes in an object and returns a dictionary of its values
 def parseAttributes(obj):
         tempDict = {}
         for key,value in obj.items():
             tempDict[key] = value
         return tempDict
-
-
-
-
-
-
-
-
-
-
