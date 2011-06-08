@@ -16,12 +16,12 @@ def getHierarchyJson():
 # Returns the Notebook Hierarchy as a Dictionary Array  
 def getHierarchy():
     oneTree = ElementTree.fromstring(onapp.GetHierarchy("",win32com.client.constants.hsPages))
-    
+
     notebooks = []
 
     for notebook in oneTree:
         nbk = parseAttributes(notebook)
-        nbk['sections'], nbk['sectionGroups'] = getSections(notebook)
+        nbk['sections'], nbk['sectionGroups'], nbk['recycleBin'] = getSections(notebook)
         notebooks.append(nbk)
 
     return notebooks
@@ -32,18 +32,21 @@ def getHierarchy():
 def getSections(notebook):
     sections = []
     sectionGroups = []
+    recycleBin = ""
     for section in notebook:
-        if (section.tag == NS + "SectionGroup"):
+        if (section.tag == NS + "SectionGroup"):               
             newSectionGroup = parseAttributes(section)
-            newSectionGroup['sections'], newSectionGroup['sectionGroups'] = getSections(section)
-            sectionGroups.append(newSectionGroup)   
+            newSectionGroup['sections'], newSectionGroup['sectionGroups'], newSectionGroup["recycleBin"] = getSections(section)
+            if (section.get("isRecycleBin")):
+               recycleBin = newSectionGroup
+            else: sectionGroups.append(newSectionGroup)   
             
         if (section.tag == NS + "Section"):
             newSection = parseAttributes(section)
             newSection['pages'] = getPages(section)
             sections.append(newSection)
             
-    return sections, sectionGroups
+    return sections, sectionGroups, recycleBin
 
 
 
@@ -74,3 +77,27 @@ def parseAttributes(obj):
         for key,value in obj.items():
             tempDict[key] = value
         return tempDict
+
+
+
+
+
+
+
+#Gets the Hierarchy as an Array of Python Dictionaries
+notebooks = getHierarchy()
+
+#print (notebooks[0]["sections"][1]["pages"][1]['ID'])
+
+print (notebooks)
+
+
+
+#xmlPage = onapp.GetPageContent("{05BC91ED-2B61-03AA-0BEB-24E475D27964}{1}{B0}")
+#print (xmlPage)
+
+
+
+
+#need to write something that takes a page, strips it of its XML contents and prints it
+
