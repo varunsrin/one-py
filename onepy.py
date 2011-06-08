@@ -21,7 +21,20 @@ def getHierarchy():
 
     for notebook in oneTree:
         nbk = parseAttributes(notebook)
-        nbk['sections'], nbk['sectionGroups'], nbk['recycleBin'] = getSections(notebook)
+        if (notebook.getchildren()):
+           s, sg = getSections(notebook)
+           if (s != []):
+               nbk['sections'] = s
+
+           # Removes RecycleBin from SectionGroups and adds as a first class object
+           for i in range(len(sg)):
+               if ('isRecycleBin' in sg[i]):
+                  nbk['recycleBin'] = sg[i]
+                  sg.pop(i)
+
+           if (sg != []):
+               nbk['sectionGroups'] = sg
+           
         notebooks.append(nbk)
 
     return notebooks
@@ -32,21 +45,24 @@ def getHierarchy():
 def getSections(notebook):
     sections = []
     sectionGroups = []
-    recycleBin = ""
     for section in notebook:
         if (section.tag == NS + "SectionGroup"):               
             newSectionGroup = parseAttributes(section)
-            newSectionGroup['sections'], newSectionGroup['sectionGroups'], newSectionGroup["recycleBin"] = getSections(section)
-            if (section.get("isRecycleBin")):
-               recycleBin = newSectionGroup
-            else: sectionGroups.append(newSectionGroup)   
+            if (section.getchildren()):
+               s, sg = getSections(section)
+               if (sg != []):
+                  newSectionGroup['sectionGroups'] = sg
+               if (s != []):
+                  newSectionGroup['sections'] = s
+            sectionGroups.append(newSectionGroup)   
             
         if (section.tag == NS + "Section"):
             newSection = parseAttributes(section)
-            newSection['pages'] = getPages(section)
+            if (section.getchildren()):
+               newSection['pages'] = getPages(section)
             sections.append(newSection)
             
-    return sections, sectionGroups, recycleBin
+    return sections, sectionGroups
 
 
 
@@ -54,8 +70,9 @@ def getSections(notebook):
 def getPages(section):
      pages =[]
      for page in section:
-         newPage = parseAttributes(page)
-         newPage['meta'] = getMeta(page)
+         newPage = parseAttributes(page)     
+         if (page.getchildren()):
+             newPage['meta'] = getMeta(page)
          pages.append(newPage)
      return pages
 
@@ -81,23 +98,4 @@ def parseAttributes(obj):
 
 
 
-
-
-
-#Gets the Hierarchy as an Array of Python Dictionaries
-notebooks = getHierarchy()
-
-#print (notebooks[0]["sections"][1]["pages"][1]['ID'])
-
-print (notebooks)
-
-
-
-#xmlPage = onapp.GetPageContent("{05BC91ED-2B61-03AA-0BEB-24E475D27964}{1}{B0}")
-#print (xmlPage)
-
-
-
-
-#need to write something that takes a page, strips it of its XML contents and prints it
 
