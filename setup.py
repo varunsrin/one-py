@@ -17,7 +17,7 @@ setup(
     author='Varun Srinivasan',
     author_email='varunsrin@gmail.com',
     url="https://github.com/varunsrin/one-py",
-    classifiers=(
+    classifiers=[
         'Development Status :: 3 - Alpha',
         'Intended Audience :: Developers',
         'Natural Language :: English',
@@ -26,6 +26,6 @@ setup(
         'Operating System :: Microsoft :: Windows',
         'Programming Language :: Python',
         'Programming Language :: Python :: 3',
-        'Topic :: Software Development :: Libraries :: Python Modules'
-    )
+        'Topic :: Software Development :: Libraries :: Python Modules',
+    ]
 )
