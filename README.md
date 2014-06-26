@@ -36,6 +36,6 @@ Create a new file called `nb_printer.py` and type the following into it:
   
     # print a list of notebooks open in the OneNote 2013 client
     for notebook in on.hierarchy
-      print (n)
+      print (notebook)
 
 Save the file, and run `nb_printer.py` from the cmd prompt
