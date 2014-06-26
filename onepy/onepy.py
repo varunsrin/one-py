@@ -4,7 +4,6 @@ from xml.etree import cElementTree
 
 NS = ""
 
-# 
 class OneNote():
 
     def __init__(self):
@@ -19,9 +18,6 @@ class OneNote():
         page_content_xml = cElementTree.fromstring(self.process.GetPageContent(page_id))
         return PageContent(page_content_xml)
         
-#
-#  HIERARCHY
-#
 
 class Hierarchy():
 
@@ -35,10 +31,6 @@ class Hierarchy():
         for c in self._children:
             yield c
 
-
-#
-# HIERARCHY NODE
-#
 
 class HierarchyNode():
 
@@ -55,10 +47,6 @@ class HierarchyNode():
         self.id = xml.get("ID")
         self.last_modified_time = xml.get("lastModifiedTime")
 
-
-#
-#   NOTEBOOK CLASS
-#
 
 class Notebook(HierarchyNode):
 
@@ -96,11 +84,6 @@ class Notebook(HierarchyNode):
         return self.name 
 
 
-
-#
-# SECTION GROUP CLASS
-#
-
 class SectionGroup(HierarchyNode):
 
     def __init__ (self, xml=None, parent_node=None):
@@ -127,10 +110,6 @@ class SectionGroup(HierarchyNode):
             if (node.tag == NS + "Section"):
                 self._children.append(Section(node, self))
 
-
-#
-# SECTION CLASS
-#
 
 class Section(HierarchyNode):
        
@@ -168,11 +147,6 @@ class Section(HierarchyNode):
         self._children = [Page(node, self) for node in xml]
 
 
-
-#
-#  PAGE CLASS
-#
-
 class Page():
     
     def __init__ (self, xml=None, parent_node=None):
@@ -206,11 +180,6 @@ class Page():
         self._children = [Meta(node) for node in xml]
 
 
-
-#
-# META CLASS
-#
-
 class Meta():
     
     def __init__ (self, xml = None):
@@ -226,10 +195,6 @@ class Meta():
         self.name = xml.get("name")
         self.id = xml.get("content")
 
-
-#
-# PAGE CONTENT CLASS
-#
 
 class PageContent():
 
@@ -273,9 +238,6 @@ class PageContent():
                 elif (node.tag == NS + "Title"):
                     self._children.append(Title(node))       
 
-#
-# TITLE CLASS
-#
 
 class Title():
 
@@ -298,11 +260,6 @@ class Title():
             if (node.tag == NS + "OE"):
                 self._children.append(OE(node, self))
 
-
-
-#
-# OUTLINE CLASS
-#
 
 class Outline():
 
@@ -339,10 +296,6 @@ class Outline():
                         append(OE(childNode, self))     
 
 
-#
-# POSITION CLASS
-#
-
 class Position():
 
     def __init__ (self, xml=None, parent_node=None):
@@ -358,9 +311,6 @@ class Position():
         self.y = xml.get("y")
         self.z = xml.get("z")
 
-#
-# SIZE CLASS
-#
 
 class Size():
 
@@ -375,11 +325,6 @@ class Size():
         self.width = xml.get("width")
         self.height = xml.get("height")
 
-
-
-#
-# OE CLASS
-#
 
 class OE():
 
@@ -438,13 +383,7 @@ class OE():
 
             elif (node.tag == NS + "InsertedFile"):
                 self.files.append(InsertedFile(node, self))
-      
 
-
-
-#
-# INSERTED FILE CLASS
-#
 
 class InsertedFile():
 
@@ -477,11 +416,6 @@ class InsertedFile():
         self.last_modified_time = xml.get("lastModifiedTime")
         self.last_modified_by = xml.get("lastModifiedBy")
         self.id = xml.get("objectID")   
-
-
-#
-# INK CLASS
-#
 
 
 class Ink():
@@ -526,12 +460,6 @@ class Ink():
                 self.callback_id = node.get("callbackID")
             elif (node.tag == NS + "Data"):
                 self.data = node.text
-                    
-    
-
-#
-#  IMAGE CLASS
-#
 
 
 class Image():
