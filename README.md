@@ -30,12 +30,12 @@ COM Object Model for OneNote 2013 in Python
 
 Create a new file called `nb_printer.py` and type the following into it: 
 
-  import onepy
+    import onepy
   
-  on = onepy.OneNote()
+    on = onepy.OneNote()
   
-  # print a list of notebooks open in the OneNote 2013 client
-  for notebook in on.hierarchy
-    print (n)
+    # print a list of notebooks open in the OneNote 2013 client
+    for notebook in on.hierarchy
+      print (n)
 
 Save the file, and run `nb_printer.py` from the cmd prompt
