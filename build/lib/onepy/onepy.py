@@ -1,34 +1,30 @@
 from .onmanager import ONProcess
 from xml.etree import cElementTree
 
+namespace = ""
 
-NS = ""
-
-# 
 class OneNote():
 
     def __init__(self):
         self.process = ONProcess()
-        global NS
-        NS = self.process.NS
-        self.object_tree = cElementTree.fromstring(self.process.GetHierarchy("",4))
-        self.hierarchy = Hierarchy()
-        self.hierarchy.deserialize_from_xml(self.object_tree)
+        global namespace
+        namespace = self.process.namespace
+        self.object_tree = cElementTree.fromstring(self.process.get_hierarchy("",4))
+        self.hierarchy = Hierarchy(self.object_tree)
         
     def get_page_content(self, page_id):
-        page_content_xml = cElementTree.fromstring(self.process.GetPageContent(page_id))
+        page_content_xml = cElementTree.fromstring(self.process.get_page_content(page_id))
         return PageContent(page_content_xml)
         
-#
-#  HIERARCHY
-#
 
 class Hierarchy():
 
-    def __init__(self):
+    def __init__(self, xml=None):
         self._children = []
+        if (xml != None): 
+            self.__deserialize_from_xml(xml)
 
-    def deserialize_from_xml(self, xml):
+    def __deserialize_from_xml(self, xml):
         self._children = [Notebook(n) for n in xml]
                 
     def __iter__(self):
@@ -36,13 +32,9 @@ class Hierarchy():
             yield c
 
 
-#
-# HIERARCHY NODE
-#
-
 class HierarchyNode():
 
-    def _init_(self, parent=None):
+    def __init__(self, parent=None):
         self.name = ""
         self.path = ""
         self.id = ""
@@ -56,33 +48,29 @@ class HierarchyNode():
         self.last_modified_time = xml.get("lastModifiedTime")
 
 
-#
-#   NOTEBOOK CLASS
-#
-
 class Notebook(HierarchyNode):
 
     def __init__ (self, xml=None):
-        HierarchyNode.__init__(self)
+        super().__init__(self)
         self.nickname = ""
         self.color = ""
         self.is_currently_viewed = ""
         self.recycleBin = None
         self._children = []
         if (xml != None):
-            self.deserialize_from_xml(xml)
+            self.__deserialize_from_xml(xml)
 
-    def deserialize_from_xml(self, xml):
+    def __deserialize_from_xml(self, xml):
         HierarchyNode.deserialize_from_xml(self, xml)
         self.nickname = xml.get("nickname")
         self.color = xml.get("color")
         self.is_currently_viewed = xml.get("isCurrentlyViewed")
         self.recycleBin = None
         for node in xml:
-            if (node.tag == NS + "Section"):
+            if (node.tag == namespace + "Section"):
                 self._children.append(Section(node, self)) 
 
-            elif (node.tag == NS + "SectionGroup"):
+            elif (node.tag == namespace + "SectionGroup"):
                 if(node.get("isRecycleBin")):
                     self.recycleBin = SectionGroup(node, self)
                 else:
@@ -96,20 +84,15 @@ class Notebook(HierarchyNode):
         return self.name 
 
 
-
-#
-# SECTION GROUP CLASS
-#
-
 class SectionGroup(HierarchyNode):
 
     def __init__ (self, xml=None, parent_node=None):
-        HierarchyNode.__init__(self)
+        super().__init__(self)
         self.is_recycle_Bin = False
         self._children = []
         self.parent = parent_node
         if (xml != None):
-            self.deserialize_from_xml(xml)
+            self.__deserialize_from_xml(xml)
 
     def __iter__(self):
         for c in self._children:
@@ -118,31 +101,27 @@ class SectionGroup(HierarchyNode):
     def __str__(self):
         return self.name 
 
-    def deserialize_from_xml(self, xml):
+    def __deserialize_from_xml(self, xml):
         HierarchyNode.deserialize_from_xml(self, xml)
         self.is_recycle_Bin = xml.get("isRecycleBin")
         for node in xml:
-            if (node.tag == NS + "SectionGroup"):
+            if (node.tag == namespace + "SectionGroup"):
                 self._children.append(SectionGroup(node, self))
-            if (node.tag == NS + "Section"):
+            if (node.tag == namespace + "Section"):
                 self._children.append(Section(node, self))
 
-
-#
-# SECTION CLASS
-#
 
 class Section(HierarchyNode):
        
     def __init__ (self, xml=None, parent_node=None):
-        HierarchyNode.__init__(self)
+        super().__init__(self)
         self.color = ""
         self.read_only = False
         self.is_currently_viewed = False      
         self._children = []
         self.parent = parent_node
         if (xml != None):
-            self.deserialize_from_xml(xml)
+            self.__deserialize_from_xml(xml)
 
 
     def __iter__(self):
@@ -153,25 +132,20 @@ class Section(HierarchyNode):
         return self.name
 
 
-    def deserialize_from_xml(self, xml):
+    def __deserialize_from_xml(self, xml):
         HierarchyNode.deserialize_from_xml(self, xml)
         self.color = xml.get("color")
         try:
             self.read_only = xml.get("readOnly")
-        except:
+        except Exception as e:
             self.read_only = False
         try:
             self.is_currently_viewed = xml.get("isCurrentlyViewed")      
-        except:
+        except Exception as e:
             self.is_currently_viewed = False
 
         self._children = [Page(node, self) for node in xml]
 
-
-
-#
-#  PAGE CLASS
-#
 
 class Page():
     
@@ -184,8 +158,8 @@ class Page():
         self.is_currently_viewed = ""
         self._children = []
         self.parent = parent_node
-        if (xml != None):
-            self.deserialize_from_xml(xml)
+        if (xml != None):                         # != None is required here, since this can return false
+            self.__deserialize_from_xml(xml)
 
     def __iter__(self):
         for c in self._children:
@@ -196,7 +170,7 @@ class Page():
 
     # Get / Set Meta
 
-    def deserialize_from_xml (self, xml):
+    def __deserialize_from_xml (self, xml):
         self.name = xml.get("name")
         self.id = xml.get("ID")
         self.date_time = xml.get("dateTime")
@@ -206,30 +180,21 @@ class Page():
         self._children = [Meta(node) for node in xml]
 
 
-
-#
-# META CLASS
-#
-
 class Meta():
     
     def __init__ (self, xml = None):
         self.name = ""
         self.content = ""
         if (xml!=None):
-            self.deserialize_from_xml(xml)
+            self.__deserialize_from_xml(xml)
 
     def __str__(self):
         return self.name 
 
-    def deserialize_from_xml (self, xml):
+    def __deserialize_from_xml (self, xml):
         self.name = xml.get("name")
         self.id = xml.get("content")
 
-
-#
-# PAGE CONTENT CLASS
-#
 
 class PageContent():
 
@@ -244,7 +209,7 @@ class PageContent():
         self._children= []
         self.files = []
         if (xml != None):
-            self.deserialize_from_xml(xml)
+            self.__deserialize_from_xml(xml)
 
     def __iter__(self):
         for c in self._children:
@@ -253,7 +218,7 @@ class PageContent():
     def __str__(self):
         return self.name 
 
-    def deserialize_from_xml(self, xml):
+    def __deserialize_from_xml(self, xml):
             self.name = xml.get("name")
             self.id = xml.get("ID")
             self.date_time = xml.get("dateTime")
@@ -262,20 +227,17 @@ class PageContent():
             self.lang = xml.get("lang")
             self.is_currently_viewed = xml.get("isCurrentlyViewed")
             for node in xml:
-                if (node.tag == NS + "Outline"):
+                if (node.tag == namespace + "Outline"):
                    self._children.append(Outline(node))
-                elif (node.tag == NS + "Ink"):
+                elif (node.tag == namespace + "Ink"):
                     self.files.append(Ink(node))
-                elif (node.tag == NS + "Image"):
+                elif (node.tag == namespace + "Image"):
                     self.files.append(Image(node))
-                elif (node.tag == NS + "InsertedFile"):
+                elif (node.tag == namespace + "InsertedFile"):
                     self.files.append(InsertedFile(node))       
-                elif (node.tag == NS + "Title"):
+                elif (node.tag == namespace + "Title"):
                     self._children.append(Title(node))       
 
-#
-# TITLE CLASS
-#
 
 class Title():
 
@@ -283,6 +245,8 @@ class Title():
         self.style = ""
         self.lang = ""
         self._children = []
+        if (xml != None):
+            self.__deserialize_from_xml(xml)
 
     def __str__ (self):
         return "Page Title"
@@ -291,18 +255,13 @@ class Title():
         for c in self._children:
             yield c
 
-    def deserialize_from_xml(self, xml):
+    def __deserialize_from_xml(self, xml):
         self.style = xml.get("style")
         self.lang = xml.get("lang")
         for node in xml:
-            if (node.tag == NS + "OE"):
+            if (node.tag == namespace + "OE"):
                 self._children.append(OE(node, self))
 
-
-
-#
-# OUTLINE CLASS
-#
 
 class Outline():
 
@@ -314,8 +273,8 @@ class Outline():
         self.last_modified_time = ""
         self.id = ""
         self._children = []
-        if(xml != None):
-            self.deserialize_from_xml(xml)
+        if (xml != None):
+            self.__deserialize_from_xml(xml)
 
     def __iter__(self):
         for c in self._children:
@@ -324,7 +283,7 @@ class Outline():
     def __str__(self):
         return "Outline"
 
-    def deserialize_from_xml (self, xml):     
+    def __deserialize_from_xml (self, xml):     
         self.author = xml.get("author")
         self.author_initials = xml.get("authorInitials")
         self.last_modified_by = xml.get("lastModifiedBy")
@@ -333,15 +292,11 @@ class Outline():
         self.id = xml.get("objectID")
         append = self._children.append
         for node in xml:
-            if (node.tag == NS + "OEChildren"):
+            if (node.tag == namespace + "OEChildren"):
                 for childNode in node:
-                    if (childNode.tag == NS + "OE"):
+                    if (childNode.tag == namespace + "OE"):
                         append(OE(childNode, self))     
 
-
-#
-# POSITION CLASS
-#
 
 class Position():
 
@@ -351,16 +306,13 @@ class Position():
         self.z = ""
         self.parent = parent_node
         if (xml!=None):
-            self.deserialize_from_xml(xml)
+            self.__deserialize_from_xml(xml)
 
-    def deserialize_from_xml(self, xml):
+    def __deserialize_from_xml(self, xml):
         self.x = xml.get("x")
         self.y = xml.get("y")
         self.z = xml.get("z")
 
-#
-# SIZE CLASS
-#
 
 class Size():
 
@@ -369,17 +321,12 @@ class Size():
         self.height = ""
         self.parent = parent_node
         if (xml!=None):
-            self.deserialize_from_xml(xml)
+            self.__deserialize_from_xml(xml)
 
-    def deserialize_from_xml(self, xml):
+    def __deserialize_from_xml(self, xml):
         self.width = xml.get("width")
         self.height = xml.get("height")
 
-
-
-#
-# OE CLASS
-#
 
 class OE():
 
@@ -397,7 +344,7 @@ class OE():
         self.parent = parent_node
         self.files = []
         if (xml != None):
-            self.deserialize_from_xml(xml)
+            self.__deserialize_from_xml(xml)
 
     def __iter__(self):
         for c in self._children:
@@ -409,7 +356,7 @@ class OE():
         except AttributeError:
             return "Empty OE"
 
-    def deserialize_from_xml(self, xml):
+    def __deserialize_from_xml(self, xml):
         self.creation_time = xml.get("creationTime")
         self.last_modified_time = xml.get("lastModifiedTime")
         self.last_modified_by = xml.get("lastModifiedBy")
@@ -419,32 +366,26 @@ class OE():
         self.style = xml.get("style")
 
         for node in xml:
-            if (node.tag == NS + "T"):
+            if (node.tag == namespace + "T"):
                 if (node.text != None):
                     self.text = node.text
                 else:
                     self.text = "NO TEXT"
 
-            elif (node.tag == NS + "OEChildren"):
+            elif (node.tag == namespace + "OEChildren"):
                 for childNode in node:
-                    if (childNode.tag == NS + "OE"):
+                    if (childNode.tag == namespace + "OE"):
                         self._children.append(OE(childNode, self))
 
-            elif (node.tag == NS + "Image"):
+            elif (node.tag == namespace + "Image"):
                 self.files.append(Image(node, self))
 
-            elif (node.tag == NS + "InkWord"):
+            elif (node.tag == namespace + "InkWord"):
                 self.files.append(Ink(node, self))
 
-            elif (node.tag == NS + "InsertedFile"):
+            elif (node.tag == namespace + "InsertedFile"):
                 self.files.append(InsertedFile(node, self))
-      
 
-
-
-#
-# INSERTED FILE CLASS
-#
 
 class InsertedFile():
 
@@ -459,9 +400,9 @@ class InsertedFile():
         self.id = ""
         self.parent = parent_node
         if (xml != None):
-            self.deserialize_from_xml(xml)
+            self.__deserialize_from_xml(xml)
 
-    def _iter_ (self):
+    def __iter__ (self):
         yield None
     
     def __str__(self):
@@ -470,18 +411,13 @@ class InsertedFile():
         except AttributeError:
             return "Unnamed File"
 
-    def deserialize_from_xml(self, xml):
+    def __deserialize_from_xml(self, xml):
         self.path_cache = xml.get("pathCache")
         self.path_source = xml.get("pathSource")
         self.preferred_name = xml.get("preferredName")
         self.last_modified_time = xml.get("lastModifiedTime")
         self.last_modified_by = xml.get("lastModifiedBy")
         self.id = xml.get("objectID")   
-
-
-#
-# INK CLASS
-#
 
 
 class Ink():
@@ -501,9 +437,9 @@ class Ink():
         self.parent = parent_node
 
         if (xml != None):
-            self.deserialize_from_xml(xml)
+            self.__deserialize_from_xml(xml)
 
-    def _iter_ (self):
+    def __iter__ (self):
         yield None
     
     def __str__(self):
@@ -512,7 +448,7 @@ class Ink():
         except AttributeError:
             return "Unrecognized Ink"
 
-    def deserialize_from_xml(self, xml):
+    def __deserialize_from_xml(self, xml):
         self.recognized_text = xml.get("recognizedText")
         self.x = xml.get("x")
         self.y = xml.get("y")
@@ -522,16 +458,10 @@ class Ink():
         self.height = xml.get("height")
             
         for node in xml:
-            if (node.tag == NS + "CallbackID"):
+            if (node.tag == namespace + "CallbackID"):
                 self.callback_id = node.get("callbackID")
-            elif (node.tag == NS + "Data"):
+            elif (node.tag == namespace + "Data"):
                 self.data = node.text
-                    
-    
-
-#
-#  IMAGE CLASS
-#
 
 
 class Image():
@@ -545,23 +475,23 @@ class Image():
         self.data = ""
         self.parent = parent_node
         if (xml != None):
-            self.deserialize_from_xml(xml)
+            self.__deserialize_from_xml(xml)
 
-    def _iter_ (self):
+    def __iter__ (self):
         yield None
     
     def __str__(self):
         return self.format + " Image"
 
-    def deserialize_from_xml(self, xml):
+    def __deserialize_from_xml(self, xml):
         self.format = xml.get("format")
         self.original_page_number = xml.get("originalPageNumber")
         self.last_modified_time = xml.get("lastModifiedTime")
         self.id = xml.get("objectID")
         for node in xml:
-            if (node.tag == NS + "CallbackID"):
+            if (node.tag == namespace + "CallbackID"):
                 self.callback_id = node.get("callbackID")
-            elif (node.tag == NS + "Data"):
+            elif (node.tag == namespace + "Data"):
                 if (node.text != None):
                     self.data = node.text
                 

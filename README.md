@@ -21,6 +21,11 @@ COM Object Model for OneNote 2013 in Python
 * Select `Microsoft OneNote 15.0 Extended Type Library`
 
 
+### How do I build onepy?
+
+* From the repo, run `python.exe setup.py register sdist bdist_wininst upload`
+
+
 ### How do I install onepy?
 
 `pip install onepy`
