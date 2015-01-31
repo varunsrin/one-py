@@ -40,7 +40,33 @@ Create a new file called `nb_printer.py` and type the following into it:
     on = onepy.OneNote()
   
     # print a list of notebooks open in the OneNote 2013 client
-    for notebook in on.hierarchy
+    for notebook in on.hierarchy:
       print (notebook)
 
 Save the file, and run `nb_printer.py` from the cmd prompt
+
+
+### Common Errors
+
+```
+(Office 2013) This COM object can not automate the makepy process - please run makepy manually for this object
+```
+
+To work around this, run regedit.exe, and navigate to 
+```
+HKEY_CLASSES_ROOT\TypeLib\{0EA692EE-BB50-4E3C-AEF0-356D91732725}
+```
+
+There should only be one subfolder in this class called 1.1. If you see 1.0 or any other folders, you'll need to delete them. The final hierarchy should look like this: 
+
+```
+|- {0EA692EE-BB50-4E3C-AEF0-356D91732725}
+|     |- 1.1
+|         |-0
+|         | |- win32
+|         |- FLAGDS
+|         |- HELPDIR
+```
+
+Source: [Stack Overflow](http://stackoverflow.com/questions/16287432/python-pywin-onenote-com-onenote-application-15-cannot-automate-the-makepy-p)
+
