@@ -28,7 +28,7 @@ class ONProcess():
                 self.namespace = ON14_SCHEMA         
         except Exception as e:
             print (e)
-            print("error starting onenote " + version)
+            print("error starting onenote {}".format(version))
 
 
     def get_hierarchy(self, start_node_id="", hierarchy_scope=4):
