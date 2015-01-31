@@ -127,7 +127,7 @@ class ONProcess():
         except Exception as e: 
             print("Could not Navigate To")
 
-    def publish(self, hierarchy_id, target_file_path, publish_format, clsid_of_exporter=0):
+    def publish(self, hierarchy_id, target_file_path, publish_format, clsid_of_exporter=""):
         """
          PublishFormat
           0 - Published page is in .one format.
