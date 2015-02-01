@@ -21,7 +21,7 @@ COM Object Model for OneNote 2013 in Python
 * Select `Microsoft OneNote 15.0 Extended Type Library`
 
 
-#### How do I build onepy?
+#### How do I submit a new version to the Package Manager?
 
 * From the repo, run `python.exe setup.py register sdist bdist_wininst upload`
 
@@ -35,17 +35,17 @@ COM Object Model for OneNote 2013 in Python
 
 onepy exposes two main classes - OneNote and ONProcess. 
 
-1. OneNote 
+**OneNote**
 
 OneNote is an object model class that lets you read content and hierarchy 
-from the OneNote application. It exposes them as native python types so that
-you can easily read OneNote data without having to muck around with the
-underlying COM interfaces.
+from the OneNote application. It exposes them as native python types so you
+can read OneNote data without having to muck around with the underlying
+COM interfaces.
 
 Updating content via the object model is possible, but not implemented today.
 
 Use OneNote to read content from notebooks:
-```
+```python
 import onepy
   
 on = onepy.OneNote()
@@ -56,17 +56,18 @@ for notebook in on.hierarchy:
 ```
 
 
-2. ONProcess
+**ONProcess**
 
-ONProcess is a thin python wrapper around the OneNote COM Interface. It
-simplifies starting up the process, choosing the right process when multiple
+ONProcess is a thin python wrapper around the COM interfaces for the [OneNote API](https://msdn.microsoft.com/en-us/library/office/jj680118\(v=office.15\).aspx).
+It simplifies starting up the process, choosing the right process when multiple
 versions are available and provides more pythonic interfaces for the OneNote
 process.
 
-You'll need to use ONProcess to do anything outside of reading content.
+You'll need to use ONProcess to do anything outside of reading content. Read the
+source for onmanager.py for a list of available API calls.
 
 For example, you can export onenote sections to PDF:
-```
+```python
 import onepy
   
 on = onepy.OneNote()
