@@ -26,4 +26,4 @@ from .onepy import (
 
 from .onmanager import ONProcess
 
-__version__ = "0.2"
+__version__ = "0.2.1"
