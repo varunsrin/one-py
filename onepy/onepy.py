@@ -12,8 +12,8 @@ class OneNote():
         self.object_tree = cElementTree.fromstring(self.process.get_hierarchy("",4))
         self.hierarchy = Hierarchy(self.object_tree)
         
-    def get_page_content(self, page_id):
-        page_content_xml = cElementTree.fromstring(self.process.get_page_content(page_id))
+    def get_page_content(self, page_id, page_info=0):
+        page_content_xml = cElementTree.fromstring(self.process.get_page_content(page_id, page_info))
         return PageContent(page_content_xml)
         
 
