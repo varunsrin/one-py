@@ -235,6 +235,8 @@ class PageContent():
                     self.files.append(Image(node))
                 elif (node.tag == namespace + "InsertedFile"):
                     self.files.append(InsertedFile(node))       
+                elif (node.tag == namespace + "MediaFile"):
+                    self.files.append(MediaFile(node, self))  
                 elif (node.tag == namespace + "Title"):
                     self._children.append(Title(node))       
 
@@ -386,6 +388,9 @@ class OE():
             elif (node.tag == namespace + "InsertedFile"):
                 self.files.append(InsertedFile(node, self))
 
+            elif (node.tag == namespace + "MediaFile"):
+                self.files.append(MediaFile(node, self))
+
 
 class InsertedFile():
 
@@ -419,7 +424,13 @@ class InsertedFile():
         self.last_modified_by = xml.get("lastModifiedBy")
         self.id = xml.get("objectID")   
 
+        
+# Dummy class to give the ability to type check files that 
+# derived from the MediaFile XML tag
+class MediaFile(InsertedFile):
+    pass
 
+    
 class Ink():
 
     # need to add position data to this class
