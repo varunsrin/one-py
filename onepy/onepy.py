@@ -238,7 +238,9 @@ class PageContent():
                 elif (node.tag == namespace + "MediaFile"):
                     self.files.append(MediaFile(node, self))  
                 elif (node.tag == namespace + "Title"):
-                    self._children.append(Title(node))       
+                    self._children.append(Title(node))    
+                elif (node.tag == namespace + "MediaPlaylist"):
+                    self.media_playlist = MediaPlaylist(node, self)
 
 
 class Title():
@@ -345,6 +347,7 @@ class OE():
         self._children = []
         self.parent = parent_node
         self.files = []
+        self.media_indices = []
         if (xml != None):
             self.__deserialize_from_xml(xml)
 
@@ -390,6 +393,9 @@ class OE():
 
             elif (node.tag == namespace + "MediaFile"):
                 self.files.append(MediaFile(node, self))
+                
+            elif (node.tag == namespace + "MediaIndex"):
+                self.media_indices.append(MediaIndex(node, self))
 
 
 class InsertedFile():
@@ -424,12 +430,76 @@ class InsertedFile():
         self.last_modified_by = xml.get("lastModifiedBy")
         self.id = xml.get("objectID")   
 
+  
+class MediaReference():
+    def __init__ (self, xml=None, parent_node=None):
+        self.media_id = ""
         
-# Dummy class to give the ability to type check files that 
-# derived from the MediaFile XML tag
-class MediaFile(InsertedFile):
-    pass
+    def __iter__ (self):
+        yield None
+    
+    def __str__(self):
+        return "Media Reference"
 
+    def __deserialize_from_xml(self, xml):
+        self.media_id = xml.get("mediaID")
+        
+
+class MediaPlaylist():
+    def __init__ (self, xml=None, parent_node=None):
+        self.media_references = []
+        
+    def __iter__(self):
+        for c in self.media_references:
+            yield c
+    
+    def __str__(self):
+        return "Media Index"
+
+    def __deserialize_from_xml(self, xml):
+        for node in xml:
+            if (node.tag == namespace + "MediaReference"):
+                self.media_references.append(MediaReference(node, self))
+        
+        
+class MediaIndex():
+    def __init__ (self, xml=None, parent_node=None):
+        self.media_reference = None
+        self.time_index = 0
+        
+    def __iter__(self):
+        yield None
+    
+    def __str__(self):
+        return "Media Index"
+
+    def __deserialize_from_xml(self, xml):
+        self.time_index = xml.get("timeIndex")
+        for node in xml:
+            if (node.tag == namespace + "MediaReference"):
+                self.media_reference = MediaReference(node, self)
+                
+  
+class MediaFile(InsertedFile):
+    def __init__ (self, xml=None, parent_node=None):
+        self.media_reference = None
+        super().__init__(xml, parent_node)
+        
+    def __iter__(self):
+        yield None
+
+    def __str__(self):
+        try:
+            return self.preferredName
+        except AttributeError:
+            return "Unnamed Media File"
+            
+    def __deserialize_from_xml(self, xml):
+        super().__deserialize_from_xml(xml)
+        for node in xml:
+            if (node.tag == namespace + "MediaReference"):
+                self.media_reference = MediaReference(node, self)
+    
     
 class Ink():
 
