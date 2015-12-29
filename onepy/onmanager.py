@@ -1,4 +1,5 @@
 import win32com.client
+import pywintypes as pwt
 
 if win32com.client.gencache.is_readonly == True:
     win32com.client.gencache.is_readonly = False
@@ -64,9 +65,9 @@ class ONProcess():
             print("Could not Open Hierarchy")
 
 
-    def delete_hierarchy (self, object_id, excpect_last_modified=""):
+    def delete_hierarchy (self, object_id, last_modified):
         try:
-            self.process.DeleteHierarchy(object_id, excpect_last_modified)
+            self.process.DeleteHierarchy(object_id, pwt.Time(last_modified))
         except Exception as e: 
             print(e)
             print("Could not Delete Hierarchy")
@@ -105,9 +106,9 @@ class ONProcess():
             print(e)
             print("Could not get Page Content")
             
-    def update_page_content(self, page_changes_xml_in, excpect_last_modified=0):
+    def update_page_content(self, page_changes_xml_in, last_modified):
         try:
-            self.process.UpdatePageContent(page_changes_xml_in, excpect_last_modified)
+            self.process.UpdatePageContent(page_changes_xml_in, pwt.Time(last_modified))
         except Exception as e: 
             print(e)
             print("Could not Update Page Content")
@@ -119,9 +120,9 @@ class ONProcess():
             print(e)
             print("Could not Get Binary Page Content")
 
-    def delete_page_content(self, page_id, object_id, excpect_last_modified=0):
+    def delete_page_content(self, page_id, object_id, last_modified):
         try:
-            self.process.DeletePageContent(page_id, object_id, excpect_last_modified)
+            self.process.DeletePageContent(page_id, object_id, pwt.Time(last_modified))
         except Exception as e: 
             print(e)
             print("Could not Delete Page Content")
