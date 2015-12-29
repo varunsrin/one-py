@@ -188,3 +188,10 @@ class ONProcess():
             print(e)
             print("Could not retreive special location")
     
+    def get_parent(self, object_id):
+        try:
+            return(self.process.GetHierarchyParent(object_id))
+        except Exception as e:
+            print(e)
+            print("Could not retrieve parent object")
+    
