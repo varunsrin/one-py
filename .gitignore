@@ -3,3 +3,5 @@ build/*
 MANIFEST
 onepy/__pycache__/
 tests/__pycache__/
+.project
+.pydevproject
