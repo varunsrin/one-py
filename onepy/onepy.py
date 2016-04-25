@@ -1,12 +1,18 @@
 from .onmanager import ONProcess
 from xml.etree import cElementTree
+import os
+
+# Check for the existing of ON_COM32_VERSION environment variable,
+# Default value is set to 15
+# Existing value 14 may be used
+ON_COM32_VERSION = os.environ.get("ON_COM32_VERSION", 15)
 
 namespace = ""
 
 class OneNote():
 
-    def __init__(self):
-        self.process = ONProcess()
+    def __init__(self,version=int(ON_COM32_VERSION)):
+        self.process = ONProcess(version=version)
         global namespace
         namespace = self.process.namespace
         self.object_tree = cElementTree.fromstring(self.process.get_hierarchy("",4))
