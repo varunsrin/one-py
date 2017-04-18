@@ -1,4 +1,5 @@
 import win32com.client
+import pywintypes as pwt
 
 if win32com.client.gencache.is_readonly == True:
     win32com.client.gencache.is_readonly = False
@@ -45,7 +46,8 @@ class ONProcess():
     def update_hierarchy(self, changes_xml_in):
         try:
             self.process.UpdateHierarchy(changes_xml_in)
-        except Exception as e: 
+        except Exception as e:
+            print(e) 
             print("Could not Update Hierarchy")
 
     def open_hierarchy(self, path, relative_to_object_id, object_id, create_file_type=0):
@@ -59,13 +61,15 @@ class ONProcess():
         try:
             return(self.process.OpenHierarchy(path, relative_to_object_id, "", create_file_type))
         except Exception as e: 
+            print(e)
             print("Could not Open Hierarchy")
 
 
-    def delete_hierarchy (self, object_id, excpect_last_modified=""):
+    def delete_hierarchy (self, object_id, last_modified):
         try:
-            self.process.DeleteHierarchy(object_id, excpect_last_modified)
+            self.process.DeleteHierarchy(object_id, pwt.Time(last_modified))
         except Exception as e: 
+            print(e)
             print("Could not Delete Hierarchy")
 
     def create_new_page (self, section_id, new_page_style=0):
@@ -78,12 +82,14 @@ class ONProcess():
         try:
             self.process.CreateNewPage(section_id, "", new_page_style)
         except Exception as e: 
+            print(e)
             print("Unable to create the page")
             
     def close_notebook(self, notebook_id):
         try:
             self.process.CloseNotebook(notebook_id)
         except Exception as e: 
+            print(e)
             print("Could not Close Notebook")
 
     def get_page_content(self, page_id, page_info=0):
@@ -97,24 +103,28 @@ class ONProcess():
         try:
             return(self.process.GetPageContent(page_id, "", page_info))
         except Exception as e: 
+            print(e)
             print("Could not get Page Content")
             
-    def update_page_content(self, page_changes_xml_in, excpect_last_modified=0):
+    def update_page_content(self, page_changes_xml_in, last_modified):
         try:
-            self.process.UpdatePageContent(page_changes_xml_in, excpect_last_modified)
+            self.process.UpdatePageContent(page_changes_xml_in, pwt.Time(last_modified))
         except Exception as e: 
+            print(e)
             print("Could not Update Page Content")
             
     def get_binary_page_content(self, page_id, callback_id):
         try:
             return(self.process.GetBinaryPageContent(page_id, callback_id))
         except Exception as e: 
+            print(e)
             print("Could not Get Binary Page Content")
 
-    def delete_page_content(self, page_id, object_id, excpect_last_modified=0):
+    def delete_page_content(self, page_id, object_id, last_modified):
         try:
-            self.process.DeletePageContent(page_id, object_id, excpect_last_modified)
+            self.process.DeletePageContent(page_id, object_id, pwt.Time(last_modified))
         except Exception as e: 
+            print(e)
             print("Could not Delete Page Content")
 
 
@@ -125,6 +135,7 @@ class ONProcess():
         try:
             self.process.NavigateTo(object_id, "", new_window)
         except Exception as e: 
+            print(e)
             print("Could not Navigate To")
 
     def publish(self, hierarchy_id, target_file_path, publish_format, clsid_of_exporter=""):
@@ -141,24 +152,28 @@ class ONProcess():
         try:
             self.process.Publish(hierarchy_id, target_file_path, publish_format, clsid_of_exporter)
         except Exception as e: 
+            print(e)
             print("Could not Publish")
 
     def open_package(self, path_package, path_dest):
         try:
             return(self.process.OpenPackage(path_package, path_dest))
         except Exception as e: 
+            print(e)
             print("Could not Open Package")
 
     def get_hyperlink_to_object(self, hierarchy_id, target_file_path=""):
         try:
             return(self.process.GetHyperlinkToObject(hierarchy_id, target_file_path))
         except Exception as e: 
+            print(e)
             print("Could not Get Hyperlink")
 
     def find_pages(self, start_node_id, search_string, display):
         try:
             return(self.process.FindPages(start_node_id, search_string, "", False, display))
         except Exception as e: 
+            print(e)
             print("Could not Find Pages")
 
     def get_special_location(self, special_location=0):
@@ -171,5 +186,13 @@ class ONProcess():
         try:
             return(self.process.GetSpecialLocation(special_location))
         except Exception as e: 
+            print(e)
             print("Could not retreive special location")
+    
+    def get_parent(self, object_id):
+        try:
+            return(self.process.GetHierarchyParent(object_id))
+        except Exception as e:
+            print(e)
+            print("Could not retrieve parent object")
     
